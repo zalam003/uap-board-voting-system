@@ -24,7 +24,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         error: 'DATABASE_URL not configured',
         details: 'Please set DATABASE_URL environment variable',
-        example: 'postgresql://username:password@localhost:5432/uap_voting'
+        example: 'postgresql://username:password@localhost:5432/uap_voting',
+        allEnvVars: Object.keys(process.env).filter(key => key.includes('DATABASE')).sort()
       }, { status: 500 });
     }
 
@@ -34,25 +35,29 @@ export async function GET(request: NextRequest) {
         error: 'Invalid DATABASE_URL format',
         details: 'DATABASE_URL must be a PostgreSQL connection string',
         example: 'postgresql://username:password@localhost:5432/uap_voting',
-        current: databaseUrl.replace(/\/\/.*@/, '//***:***@') // Hide credentials
+        current: databaseUrl.replace(/\/\/.*@/, '//***:***@')
       }, { status: 500 });
     }
 
     // Test basic connection
     console.log('Testing PostgreSQL database connection...');
-    const connectionTest = await database.testConnection();
+    let connectionTest;
+    let connectionError = null;
+    
+    try {
+      connectionTest = await database.testConnection();
+    } catch (error) {
+      connectionError = error;
+      connectionTest = false;
+    }
     
     if (!connectionTest) {
       return NextResponse.json({
         error: 'Database connection failed',
-        details: 'Could not connect to PostgreSQL database',
-        suggestions: [
-          'Check if PostgreSQL server is running',
-          'Verify username and password in DATABASE_URL',
-          'Ensure database exists',
-          'Check host and port accessibility',
-          'Verify SSL settings for production'
-        ]
+        details: connectionError ? (connectionError as Error).message : 'Unknown connection error',
+        connectionString: databaseUrl.replace(/\/\/.*@/, '//***:***@'),
+        errorCode: (connectionError as any)?.code,
+        errorName: (connectionError as any)?.name
       }, { status: 500 });
     }
 
@@ -67,7 +72,7 @@ export async function GET(request: NextRequest) {
     `);
 
     const expectedTables = ['audit_logs', 'authorized_voters', 'candidates', 'encrypted_votes', 'voting_sessions'];
-    const existingTables = tableCheck.rows.map(row => row.table_name);
+    const existingTables = tableCheck.rows.map((row: any) => row.table_name);
     const missingTables = expectedTables.filter(table => !existingTables.includes(table));
 
     // Get database version and info
@@ -96,27 +101,10 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Log the test
-    await database.run(`
-      INSERT INTO audit_logs (
-        id, action, entity_type, details, admin_email, ip_address
-      ) VALUES (?, 'DATABASE_TEST', 'system', ?, ?, ?)
-    `, [
-      generateUUID(),
-      JSON.stringify({ 
-        connectionStatus: 'OK',
-        tablesFound: existingTables.length,
-        missingTables: missingTables.length,
-        timestamp: formatTimestamp()
-      }),
-      'admin@uap-bd.edu',
-      getClientIP(request)
-    ]);
-
     return NextResponse.json({
       status: 'success',
+      connected: true,
       connection: {
-        connected: true,
         database: connInfo.database_name,
         user: connInfo.user_name,
         host: connInfo.server_address || 'localhost',
@@ -137,25 +125,6 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Database test error:', error);
     
-    // Try to log the error (might fail if database is completely down)
-    try {
-      await database.run(`
-        INSERT INTO audit_logs (
-          id, action, entity_type, details, admin_email, ip_address
-        ) VALUES (?, 'DATABASE_TEST_FAILED', 'system', ?, ?, ?)
-      `, [
-        generateUUID(),
-        JSON.stringify({ 
-          error: error instanceof Error ? error.message : 'Unknown error',
-          timestamp: formatTimestamp()
-        }),
-        'admin@uap-bd.edu',
-        getClientIP(request)
-      ]);
-    } catch (logError) {
-      console.error('Failed to log database test error:', logError);
-    }
-
     // Provide specific error messages based on error type
     let errorDetails = 'Unknown database error';
     let suggestions: string[] = [];
@@ -164,7 +133,7 @@ export async function GET(request: NextRequest) {
       if (error.message.includes('ECONNREFUSED')) {
         errorDetails = 'Connection refused - PostgreSQL server not running or not accessible';
         suggestions = [
-          'Check if PostgreSQL server is running: sudo systemctl status postgresql',
+          'Check if PostgreSQL server is running',
           'Verify host and port in DATABASE_URL',
           'Check firewall settings'
         ];
@@ -178,21 +147,18 @@ export async function GET(request: NextRequest) {
         errorDetails = 'Authentication failed - invalid username or password';
         suggestions = [
           'Check username and password in DATABASE_URL',
-          'Verify user exists in PostgreSQL',
-          'Check user permissions'
+          'Verify user exists in PostgreSQL'
         ];
       } else if (error.message.includes('3D000')) {
         errorDetails = 'Database does not exist';
         suggestions = [
-          'Create the database: npm run create-db',
-          'Or manually: createdb your_database_name'
+          'Create the database: npm run create-db'
         ];
       } else {
         errorDetails = error.message;
         suggestions = [
           'Check PostgreSQL logs for more details',
-          'Verify DATABASE_URL format',
-          'Ensure database server is accessible'
+          'Verify DATABASE_URL format'
         ];
       }
     }
@@ -206,7 +172,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST /api/admin/test-db - Initialize database (run migrations)
+// POST /api/admin/test-db - Initialize database
 export async function POST(request: NextRequest) {
   if (!verifyAdmin(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -220,21 +186,6 @@ export async function POST(request: NextRequest) {
       const success = await initializeDatabase();
       
       if (success) {
-        // Log the initialization
-        await database.run(`
-          INSERT INTO audit_logs (
-            id, action, entity_type, details, admin_email, ip_address
-          ) VALUES (?, 'DATABASE_INITIALIZED', 'system', ?, ?, ?)
-        `, [
-          generateUUID(),
-          JSON.stringify({ 
-            success: true,
-            timestamp: formatTimestamp()
-          }),
-          'admin@uap-bd.edu',
-          getClientIP(request)
-        ]);
-
         return NextResponse.json({
           message: 'Database initialized successfully',
           timestamp: formatTimestamp()

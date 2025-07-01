@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
     const candidates = await database.all(`
       SELECT id, name, description, position
       FROM candidates 
-      WHERE voting_session_id = ? AND is_active = 1
+      WHERE voting_session_id = ? AND is_active = TRUE
       ORDER BY position ASC
     `, [payload.votingSessionId]);
 
@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
     // Verify candidate exists and is active
     const candidate = await database.get(`
       SELECT id, name FROM candidates 
-      WHERE id = ? AND voting_session_id = ? AND is_active = 1
+      WHERE id = ? AND voting_session_id = ? AND is_active = TRUE
     `, [candidateId, payload.votingSessionId]);
 
     if (!candidate) {

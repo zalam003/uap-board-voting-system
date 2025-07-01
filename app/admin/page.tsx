@@ -67,6 +67,8 @@ export default function AdminPage() {
     }
 
     setLoading(true);
+    setError(""); // Clear previous errors
+    
     try {
       const response = await fetch('/api/admin/sessions', {
         headers: { "x-admin-secret": secret }
@@ -77,11 +79,18 @@ export default function AdminPage() {
         setError("");
         await loadSessions();
       } else {
-        const errorData = await response.json();
-        setError(`Authentication failed: ${errorData.error || 'Invalid admin password'}`);
+        // Get more detailed error information
+        let errorMessage = "Authentication failed";
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || `HTTP ${response.status}: ${response.statusText}`;
+        } catch (jsonError) {
+          errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+        }
+        setError(errorMessage);
       }
     } catch (err) {
-      setError("Failed to authenticate - network error");
+      setError(`Network error: ${err instanceof Error ? err.message : 'Unknown error'}`);
     } finally {
       setLoading(false);
     }

@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
         COUNT(ev.id) as vote_count
       FROM candidates c
       LEFT JOIN encrypted_votes ev ON c.id = ev.candidate_id AND ev.voting_session_id = ?
-      WHERE c.voting_session_id = ? AND c.is_active = 1
+      WHERE c.voting_session_id = ? AND c.is_active = TRUE
       GROUP BY c.id, c.name, c.description, c.position
       ORDER BY c.position ASC
     `, [sessionId, sessionId]);

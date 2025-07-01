@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
   try {
     const candidates = await database.all(`
       SELECT * FROM candidates 
-      WHERE voting_session_id = ? AND is_active = 1
+      WHERE voting_session_id = ? AND is_active = TRUE
       ORDER BY position ASC, name ASC
     `, [sessionId]);
 
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
     if (!candidatePosition) {
       const maxPosition = await database.get(`
         SELECT MAX(position) as max_pos FROM candidates 
-        WHERE voting_session_id = ? AND is_active = 1
+        WHERE voting_session_id = ? AND is_active = TRUE
       `, [sessionId]);
       candidatePosition = (maxPosition?.max_pos || 0) + 1;
     }
