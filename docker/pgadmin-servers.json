@@ -1,0 +1,14 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "UAP Voting System Database",
+      "Group": "UAP Servers",
+      "Port": 5432,
+      "Username": "uap_voting",
+      "Host": "postgres",
+      "SSLMode": "prefer",
+      "MaintenanceDB": "uap_voting",
+      "PassFile": "/tmp/pgpassfile"
+    }
+  }
+}
