@@ -7,6 +7,12 @@ function verifyAdmin(request: NextRequest): boolean {
   const adminSecret = request.headers.get('x-admin-secret');
   const expectedSecret = process.env.ADMIN_SECRET;
   
+  console.log('DB Test - Admin verification:');
+  console.log('- Received secret:', adminSecret);
+  console.log('- Expected secret:', expectedSecret);
+  console.log('- Secrets match:', adminSecret === expectedSecret);
+  console.log('- Expected secret exists:', expectedSecret !== undefined);
+  
   return adminSecret === expectedSecret && expectedSecret !== undefined;
 }
 

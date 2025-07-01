@@ -67,22 +67,42 @@ export default function AdminPage() {
     }
 
     setLoading(true);
+    console.log('Attempting authentication with secret:', secret);
     try {
       const response = await fetch('/api/admin/sessions', {
         headers: { "x-admin-secret": secret }
       });
+
+      console.log('Auth response status:', response.status);
+      console.log('Auth response ok:', response.ok);
 
       if (response.ok) {
         setAuthenticated(true);
         setError("");
         await loadSessions();
       } else {
+        const errorData = await response.json();
+        console.log('Auth error:', errorData);
         setError("Invalid admin password");
       }
     } catch (err) {
+      console.error('Auth exception:', err);
       setError("Failed to authenticate");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function debugAuth() {
+    try {
+      const response = await fetch('/api/admin/test-auth', {
+        headers: { "x-admin-secret": secret }
+      });
+      const data = await response.json();
+      console.log('Debug Auth Response:', data);
+      setError(`Debug Info: Received: "${data.receivedSecret}", Expected: "${data.expectedSecret}", Match: ${data.secretsMatch}`);
+    } catch (err) {
+      setError("Failed to test authentication");
     }
   }
 
@@ -415,9 +435,16 @@ export default function AdminPage() {
             <button 
               onClick={authenticate}
               disabled={loading}
-              className="bg-uap-maroon text-white px-6 py-2 rounded disabled:opacity-50"
+              className="bg-uap-maroon text-white px-6 py-2 rounded disabled:opacity-50 mr-2"
             >
               {loading ? "Authenticating..." : "Access Admin Panel"}
+            </button>
+            <button 
+              onClick={debugAuth}
+              disabled={loading}
+              className="bg-gray-500 text-white px-4 py-2 rounded disabled:opacity-50"
+            >
+              Debug Auth
             </button>
           </div>
         </div>
