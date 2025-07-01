@@ -17,18 +17,6 @@ scripts/
 .gitignore
 .vercelignore
 
-# Git
-.git/
-.gitattributes
-.gitmodules
-
-# Development dependencies
-.eslintrc*
-.prettierrc*
-.editorconfig
-tsconfig.json
-jsconfig.json
-
 # IDE and editor files
 .vscode/
 .idea/

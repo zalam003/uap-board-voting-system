@@ -749,7 +749,7 @@ board.member3@uap-bd.edu`}
                       <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-xs">
                         {Object.entries(dbConfig.data).map(([table, count]) => (
                           <div key={table} className="text-green-600">
-                            <span className="font-medium">{table}:</span> {count}
+                            <span className="font-medium">{table}:</span> {String(count)}
                           </div>
                         ))}
                       </div>
