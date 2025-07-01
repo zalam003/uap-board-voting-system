@@ -1,0 +1,145 @@
+# UAP Board Voting System - Docker Ignore File
+# Files and directories to exclude from Docker build context
+
+# Version control
+.git
+.gitignore
+.gitattributes
+
+# Dependencies (will be installed in container)
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build outputs
+.next
+out
+build
+dist
+
+# Environment files (use docker/.env instead)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage
+.nyc_output
+
+# Logs
+logs
+*.log
+
+# Temporary files
+.tmp
+*.tmp
+*.temp
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDE files
+.vscode
+.idea
+*.sublime-project
+*.sublime-workspace
+
+# Documentation (not needed in container)
+README.md
+docs/
+*.md
+LICENSE
+
+# Development tools
+.prettierrc
+.eslintrc*
+.editorconfig
+
+# Testing
+.jest
+coverage/
+*.test.js
+*.spec.js
+__tests__/
+
+# Backup files
+*.backup
+*.bak
+*.old
+
+# Database files (handled by volumes)
+*.sqlite
+*.db
+
+# Uploads directory (handled by volumes)
+uploads/
+public/uploads/
+
+# Cache directories
+.cache
+.parcel-cache
+
+# Local development files
+docker-compose.dev.yml
+docker-compose.override.yml
+start-docker.sh
+start-docker.bat
+Makefile
+
+# Kubernetes files
+k8s/
+kubernetes/
+*.yaml
+*.yml
+!docker/docker-compose.yml
+
+# CI/CD files
+.github/
+.gitlab-ci.yml
+.travis.yml
+.circleci/
+
+# Package manager lockfiles (will use package-lock.json)
+yarn.lock
+pnpm-lock.yaml
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Storybook
+.storybook/
+storybook-static/
+
+# Next.js specific
+.next/
+out/
+
+# Vercel
+.vercel
+
+# Local certificates
+*.pem
+*.key
+*.crt
+
+# Development scripts
+scripts/dev/
+scripts/local/

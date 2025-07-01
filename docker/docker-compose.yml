@@ -1,0 +1,102 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: uap-voting-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: uap_voting
+      POSTGRES_USER: uap_voting
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-uap_voting_password}
+      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256 --auth-local=scram-sha-256"
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+      - ../database:/opt/database
+    networks:
+      - uap-voting-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U uap_voting -d uap_voting"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # UAP Voting Application
+  app:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: ${BUILD_TARGET:-production}
+    container_name: uap-voting-app
+    restart: unless-stopped
+    environment:
+      # Database Configuration
+      DATABASE_URL: postgresql://uap_voting:${DB_PASSWORD:-uap_voting_password}@postgres:5432/uap_voting
+      
+      # Application Configuration
+      NODE_ENV: ${NODE_ENV:-production}
+      NEXT_PUBLIC_APP_URL: ${FRONTEND_URL:-http://localhost:3000}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+      
+      # Security
+      JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
+      ADMIN_SECRET: ${ADMIN_SECRET:-change-this-admin-password}
+      
+      # Email Configuration (Gmail SMTP)
+      GMAIL_USER: ${GMAIL_USER}
+      GMAIL_APP_PASSWORD: ${GMAIL_APP_PASSWORD}
+      FROM_EMAIL: ${FROM_EMAIL:-${GMAIL_USER}}
+    ports:
+      - "${APP_PORT:-3000}:3000"
+    volumes:
+      - app_uploads:/app/uploads
+    networks:
+      - uap-voting-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/api/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # pgAdmin (Optional - for database management)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: uap-voting-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@uap-bd.edu}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+      - ./pgadmin-servers.json:/pgadmin4/servers.json:ro
+    networks:
+      - uap-voting-network
+    depends_on:
+      - postgres
+    profiles:
+      - admin
+
+networks:
+  uap-voting-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+  app_uploads:
+    driver: local
