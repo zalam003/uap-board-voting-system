@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from 'next/navigation';
 
 interface Candidate {
@@ -16,7 +16,7 @@ interface VotingSession {
   endTime: string;
 }
 
-export default function VotePage() {
+function VoteContent() {
   const [votingData, setVotingData] = useState<{
     session: VotingSession;
     candidates: Candidate[];
@@ -216,5 +216,29 @@ export default function VotePage() {
         </div>
       </div>
     </main>
+  );
+}
+
+function VotePageFallback() {
+  return (
+    <main className="bg-white min-h-screen">
+      <div className="max-w-3xl mx-auto p-6">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-uap-maroon mb-4">Loading Voting Page...</h2>
+          <div className="animate-pulse">
+            <div className="h-4 bg-gray-200 rounded w-3/4 mb-2 mx-auto"></div>
+            <div className="h-4 bg-gray-200 rounded w-1/2 mx-auto"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  );
+}
+
+export default function VotePage() {
+  return (
+    <Suspense fallback={<VotePageFallback />}>
+      <VoteContent />
+    </Suspense>
   );
 }
