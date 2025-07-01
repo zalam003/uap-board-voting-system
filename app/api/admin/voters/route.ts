@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     // Get candidates for this session
     const candidates = await database.all(`
       SELECT name FROM candidates 
-      WHERE voting_session_id = ? AND is_active = 1
+      WHERE voting_session_id = ? AND is_active = TRUE
       ORDER BY position ASC
     `, [sessionId]);
 

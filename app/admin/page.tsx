@@ -67,6 +67,8 @@ export default function AdminPage() {
     }
 
     setLoading(true);
+    setError(""); // Clear previous errors
+    
     try {
       const response = await fetch('/api/admin/sessions', {
         headers: { "x-admin-secret": secret }
@@ -77,10 +79,18 @@ export default function AdminPage() {
         setError("");
         await loadSessions();
       } else {
-        setError("Invalid admin password");
+        // Get more detailed error information
+        let errorMessage = "Authentication failed";
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || `HTTP ${response.status}: ${response.statusText}`;
+        } catch (jsonError) {
+          errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+        }
+        setError(errorMessage);
       }
     } catch (err) {
-      setError("Failed to authenticate");
+      setError(`Network error: ${err instanceof Error ? err.message : 'Unknown error'}`);
     } finally {
       setLoading(false);
     }
@@ -415,7 +425,18 @@ export default function AdminPage() {
             <button 
               onClick={authenticate}
               disabled={loading}
-              className="bg-uap-maroon text-white px-6 py-2 rounded disabled:opacity-50"
+              className="px-6 py-2 rounded disabled:opacity-50"
+              style={{
+                backgroundColor: '#7a0026',
+                color: 'white',
+                border: 'none'
+              }}
+              onMouseEnter={(e) => {
+                if (!loading) (e.target as HTMLButtonElement).style.backgroundColor = '#4b0019';
+              }}
+              onMouseLeave={(e) => {
+                if (!loading) (e.target as HTMLButtonElement).style.backgroundColor = '#7a0026';
+              }}
             >
               {loading ? "Authenticating..." : "Access Admin Panel"}
             </button>
@@ -472,7 +493,18 @@ export default function AdminPage() {
                 <button
                   onClick={createSession}
                   disabled={loading}
-                  className="bg-uap-maroon text-white px-4 py-2 rounded disabled:opacity-50"
+                  className="px-4 py-2 rounded disabled:opacity-50"
+                  style={{
+                    backgroundColor: '#7a0026',
+                    color: 'white',
+                    border: 'none'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!loading) (e.target as HTMLButtonElement).style.backgroundColor = '#4b0019';
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!loading) (e.target as HTMLButtonElement).style.backgroundColor = '#7a0026';
+                  }}
                 >
                   Create Session
                 </button>
@@ -544,7 +576,18 @@ export default function AdminPage() {
                     <button
                       onClick={addCandidate}
                       disabled={loading}
-                      className="bg-uap-maroon text-white px-4 py-2 rounded disabled:opacity-50"
+                      className="px-4 py-2 rounded disabled:opacity-50"
+                      style={{
+                        backgroundColor: '#7a0026',
+                        color: 'white',
+                        border: 'none'
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!loading) (e.target as HTMLButtonElement).style.backgroundColor = '#4b0019';
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!loading) (e.target as HTMLButtonElement).style.backgroundColor = '#7a0026';
+                      }}
                     >
                       Add Candidate
                     </button>

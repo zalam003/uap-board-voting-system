@@ -39,7 +39,7 @@ export default function HomePage() {
             </div>
             <a 
               href="/admin" 
-              className="inline-block bg-uap-maroon text-white px-6 py-2 rounded-lg font-medium hover:bg-uap-dark transition-colors mt-4"
+              className="inline-block bg-white text-uap-maroon border-2 border-uap-maroon px-6 py-2 rounded-lg font-medium hover:bg-uap-maroon hover:text-white transition-colors mt-4"
             >
               Access Admin Panel
             </a>

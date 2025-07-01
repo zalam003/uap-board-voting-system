@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
         COUNT(av.id) as voter_count,
         COUNT(ev.id) as vote_count
       FROM voting_sessions vs
-      LEFT JOIN candidates c ON vs.id = c.voting_session_id AND c.is_active = 1
+      LEFT JOIN candidates c ON vs.id = c.voting_session_id AND c.is_active = TRUE
       LEFT JOIN authorized_voters av ON vs.id = av.voting_session_id
       LEFT JOIN encrypted_votes ev ON vs.id = ev.voting_session_id
       GROUP BY vs.id
