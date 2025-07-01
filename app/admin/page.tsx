@@ -67,59 +67,30 @@ export default function AdminPage() {
     }
 
     setLoading(true);
-    console.log('Attempting authentication with secret:', secret);
     try {
       const response = await fetch('/api/admin/sessions', {
         headers: { "x-admin-secret": secret }
       });
 
-      console.log('Auth response status:', response.status);
-      console.log('Auth response ok:', response.ok);
-
       if (response.ok) {
-        console.log('Authentication successful, loading sessions...');
         setAuthenticated(true);
         setError("");
-        try {
-          await loadSessions();
-          console.log('Sessions loaded successfully');
-        } catch (sessionError) {
-          console.error('Error loading sessions:', sessionError);
-          setError("Authentication successful but failed to load sessions");
-        }
+        await loadSessions();
       } else {
         const errorData = await response.json();
-        console.log('Auth error:', errorData);
-        setError(`Authentication failed: ${errorData.error || 'Unknown error'}`);
+        setError(`Authentication failed: ${errorData.error || 'Invalid admin password'}`);
       }
     } catch (err) {
-      console.error('Auth exception:', err);
       setError("Failed to authenticate - network error");
     } finally {
       setLoading(false);
     }
   }
 
-  async function debugAuth() {
-    try {
-      const response = await fetch('/api/admin/test-auth', {
-        headers: { "x-admin-secret": secret }
-      });
-      const data = await response.json();
-      console.log('Debug Auth Response:', data);
-      setError(`Debug Info: Received: "${data.receivedSecret}", Expected: "${data.expectedSecret}", Match: ${data.secretsMatch}`);
-    } catch (err) {
-      setError("Failed to test authentication");
-    }
-  }
-
   async function loadSessions() {
     try {
-      console.log('Loading sessions with headers:', headers);
       const response = await fetch('/api/admin/sessions', { headers });
-      console.log('Sessions response status:', response.status);
       const data = await response.json();
-      console.log('Sessions response data:', data);
       
       if (response.ok) {
         setSessions(data.sessions);
@@ -130,7 +101,6 @@ export default function AdminPage() {
         setError(data.error);
       }
     } catch (err) {
-      console.error('Load sessions error:', err);
       setError("Failed to load sessions");
     }
   }
@@ -446,38 +416,20 @@ export default function AdminPage() {
             <button 
               onClick={authenticate}
               disabled={loading}
-              className="px-6 py-2 rounded disabled:opacity-50 mr-2"
+              className="px-6 py-2 rounded disabled:opacity-50"
               style={{
                 backgroundColor: '#7a0026',
                 color: 'white',
                 border: 'none'
               }}
               onMouseEnter={(e) => {
-                if (!loading) e.target.style.backgroundColor = '#4b0019';
+                if (!loading) (e.target as HTMLButtonElement).style.backgroundColor = '#4b0019';
               }}
               onMouseLeave={(e) => {
-                if (!loading) e.target.style.backgroundColor = '#7a0026';
+                if (!loading) (e.target as HTMLButtonElement).style.backgroundColor = '#7a0026';
               }}
             >
               {loading ? "Authenticating..." : "Access Admin Panel"}
-            </button>
-            <button 
-              onClick={debugAuth}
-              disabled={loading}
-              className="px-4 py-2 rounded disabled:opacity-50"
-              style={{
-                backgroundColor: '#6b7280',
-                color: 'white',
-                border: 'none'
-              }}
-              onMouseEnter={(e) => {
-                if (!loading) e.target.style.backgroundColor = '#4b5563';
-              }}
-              onMouseLeave={(e) => {
-                if (!loading) e.target.style.backgroundColor = '#6b7280';
-              }}
-            >
-              Debug Auth
             </button>
           </div>
         </div>
@@ -539,10 +491,10 @@ export default function AdminPage() {
                     border: 'none'
                   }}
                   onMouseEnter={(e) => {
-                    if (!loading) e.target.style.backgroundColor = '#4b0019';
+                    if (!loading) (e.target as HTMLButtonElement).style.backgroundColor = '#4b0019';
                   }}
                   onMouseLeave={(e) => {
-                    if (!loading) e.target.style.backgroundColor = '#7a0026';
+                    if (!loading) (e.target as HTMLButtonElement).style.backgroundColor = '#7a0026';
                   }}
                 >
                   Create Session
@@ -622,10 +574,10 @@ export default function AdminPage() {
                         border: 'none'
                       }}
                       onMouseEnter={(e) => {
-                        if (!loading) e.target.style.backgroundColor = '#4b0019';
+                        if (!loading) (e.target as HTMLButtonElement).style.backgroundColor = '#4b0019';
                       }}
                       onMouseLeave={(e) => {
-                        if (!loading) e.target.style.backgroundColor = '#7a0026';
+                        if (!loading) (e.target as HTMLButtonElement).style.backgroundColor = '#7a0026';
                       }}
                     >
                       Add Candidate
