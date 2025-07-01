@@ -18,9 +18,14 @@ function verifyAdmin(request: NextRequest): boolean {
 
 // GET /api/admin/sessions - Get all voting sessions
 export async function GET(request: NextRequest) {
+  console.log('Sessions API called');
+  
   if (!verifyAdmin(request)) {
+    console.log('Admin verification failed');
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
+
+  console.log('Admin verification passed, querying database...');
 
   try {
     const sessions = await database.all(`
@@ -37,6 +42,7 @@ export async function GET(request: NextRequest) {
       ORDER BY vs.created_at DESC
     `);
 
+    console.log('Database query successful, sessions:', sessions);
     return NextResponse.json({ sessions });
   } catch (error) {
     console.error('Error fetching sessions:', error);

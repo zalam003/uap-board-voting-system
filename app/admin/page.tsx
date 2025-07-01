@@ -77,17 +77,24 @@ export default function AdminPage() {
       console.log('Auth response ok:', response.ok);
 
       if (response.ok) {
+        console.log('Authentication successful, loading sessions...');
         setAuthenticated(true);
         setError("");
-        await loadSessions();
+        try {
+          await loadSessions();
+          console.log('Sessions loaded successfully');
+        } catch (sessionError) {
+          console.error('Error loading sessions:', sessionError);
+          setError("Authentication successful but failed to load sessions");
+        }
       } else {
         const errorData = await response.json();
         console.log('Auth error:', errorData);
-        setError("Invalid admin password");
+        setError(`Authentication failed: ${errorData.error || 'Unknown error'}`);
       }
     } catch (err) {
       console.error('Auth exception:', err);
-      setError("Failed to authenticate");
+      setError("Failed to authenticate - network error");
     } finally {
       setLoading(false);
     }
@@ -108,8 +115,11 @@ export default function AdminPage() {
 
   async function loadSessions() {
     try {
+      console.log('Loading sessions with headers:', headers);
       const response = await fetch('/api/admin/sessions', { headers });
+      console.log('Sessions response status:', response.status);
       const data = await response.json();
+      console.log('Sessions response data:', data);
       
       if (response.ok) {
         setSessions(data.sessions);
@@ -120,6 +130,7 @@ export default function AdminPage() {
         setError(data.error);
       }
     } catch (err) {
+      console.error('Load sessions error:', err);
       setError("Failed to load sessions");
     }
   }
@@ -435,14 +446,14 @@ export default function AdminPage() {
             <button 
               onClick={authenticate}
               disabled={loading}
-              className="bg-uap-maroon text-white px-6 py-2 rounded disabled:opacity-50 mr-2"
+              className="bg-uap-maroon text-white px-6 py-2 rounded disabled:opacity-50 hover:bg-uap-dark mr-2"
             >
               {loading ? "Authenticating..." : "Access Admin Panel"}
             </button>
             <button 
               onClick={debugAuth}
               disabled={loading}
-              className="bg-gray-500 text-white px-4 py-2 rounded disabled:opacity-50"
+              className="bg-gray-600 text-white px-4 py-2 rounded disabled:opacity-50 hover:bg-gray-700"
             >
               Debug Auth
             </button>
