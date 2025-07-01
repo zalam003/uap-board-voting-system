@@ -11,7 +11,7 @@ const createTransporter = (): Transporter => {
     throw new Error('Gmail SMTP credentials missing. Please set GMAIL_USER and GMAIL_APP_PASSWORD in environment variables.');
   }
 
-  return nodemailer.createTransporter({
+  return nodemailer.createTransport({
     service: 'gmail',
     auth: {
       user: gmailUser,

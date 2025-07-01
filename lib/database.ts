@@ -1,4 +1,4 @@
-import { Pool, PoolClient, QueryResult } from 'pg';
+import { Pool, PoolClient, QueryResult, QueryResultRow } from 'pg';
 
 // PostgreSQL connection configuration
 const connectionConfig = {
@@ -29,7 +29,7 @@ class Database {
     return this.pool;
   }
 
-  async query<T = any>(text: string, params: any[] = []): Promise<QueryResult<T>> {
+  async query<T extends QueryResultRow = any>(text: string, params: any[] = []): Promise<QueryResult<T>> {
     const pool = this.getPool();
     const start = Date.now();
     
@@ -58,12 +58,12 @@ class Database {
     };
   }
 
-  async get<T = any>(sql: string, params: any[] = []): Promise<T | undefined> {
+  async get<T extends QueryResultRow = any>(sql: string, params: any[] = []): Promise<T | undefined> {
     const result = await this.query<T>(sql, params);
     return result.rows[0];
   }
 
-  async all<T = any>(sql: string, params: any[] = []): Promise<T[]> {
+  async all<T extends QueryResultRow = any>(sql: string, params: any[] = []): Promise<T[]> {
     const result = await this.query<T>(sql, params);
     return result.rows;
   }
