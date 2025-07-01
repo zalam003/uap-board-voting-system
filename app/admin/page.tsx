@@ -446,14 +446,36 @@ export default function AdminPage() {
             <button 
               onClick={authenticate}
               disabled={loading}
-              className="bg-uap-maroon text-white px-6 py-2 rounded disabled:opacity-50 hover:bg-uap-dark mr-2"
+              className="px-6 py-2 rounded disabled:opacity-50 mr-2"
+              style={{
+                backgroundColor: '#7a0026',
+                color: 'white',
+                border: 'none'
+              }}
+              onMouseEnter={(e) => {
+                if (!loading) e.target.style.backgroundColor = '#4b0019';
+              }}
+              onMouseLeave={(e) => {
+                if (!loading) e.target.style.backgroundColor = '#7a0026';
+              }}
             >
               {loading ? "Authenticating..." : "Access Admin Panel"}
             </button>
             <button 
               onClick={debugAuth}
               disabled={loading}
-              className="bg-gray-600 text-white px-4 py-2 rounded disabled:opacity-50 hover:bg-gray-700"
+              className="px-4 py-2 rounded disabled:opacity-50"
+              style={{
+                backgroundColor: '#6b7280',
+                color: 'white',
+                border: 'none'
+              }}
+              onMouseEnter={(e) => {
+                if (!loading) e.target.style.backgroundColor = '#4b5563';
+              }}
+              onMouseLeave={(e) => {
+                if (!loading) e.target.style.backgroundColor = '#6b7280';
+              }}
             >
               Debug Auth
             </button>
@@ -510,7 +532,18 @@ export default function AdminPage() {
                 <button
                   onClick={createSession}
                   disabled={loading}
-                  className="bg-uap-maroon text-white px-4 py-2 rounded disabled:opacity-50"
+                  className="px-4 py-2 rounded disabled:opacity-50"
+                  style={{
+                    backgroundColor: '#7a0026',
+                    color: 'white',
+                    border: 'none'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!loading) e.target.style.backgroundColor = '#4b0019';
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!loading) e.target.style.backgroundColor = '#7a0026';
+                  }}
                 >
                   Create Session
                 </button>
@@ -582,7 +615,18 @@ export default function AdminPage() {
                     <button
                       onClick={addCandidate}
                       disabled={loading}
-                      className="bg-uap-maroon text-white px-4 py-2 rounded disabled:opacity-50"
+                      className="px-4 py-2 rounded disabled:opacity-50"
+                      style={{
+                        backgroundColor: '#7a0026',
+                        color: 'white',
+                        border: 'none'
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!loading) e.target.style.backgroundColor = '#4b0019';
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!loading) e.target.style.backgroundColor = '#7a0026';
+                      }}
                     >
                       Add Candidate
                     </button>
